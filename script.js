@@ -64,4 +64,55 @@ Regole:
 // Nota: chiamata diretta dal browser; la tua API key rimane sul client.
 // Per produzione è consigliabile un proxy lato server.
 async function fetchReply() {
-  const apiKey = (el
+  const apiKey = (els.apiKey.value || '').trim();
+  if (!apiKey) {
+    alert('Inserisci la tua OpenAI API key.');
+    return;
+  }
+  const msg = (els.message.value || '').trim();
+  if (!msg) {
+    alert('Inserisci un messaggio.');
+    return;
+  }
+
+  els.btnSuggest.disabled = true;
+  els.btnSuggest.textContent = 'Generazione…';
+
+  const payload = {
+    model: els.model.value,
+    messages: [
+      { role: 'system', content: buildSystemPrompt(els.tone.value) },
+      { role: 'user', content: `Messaggio ricevuto:\n${msg}\n\nScrivi una risposta adeguata.` }
+    ],
+    temperature: 0.4
+  };
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`HTTP ${res.status}: ${t}`);
+    }
+
+    const data = await res.json();
+    const content = data?.choices?.[0]?.message?.content?.trim() || '';
+    els.output.value = content || '(nessun testo generato)';
+  } catch (err) {
+    console.error(err);
+    els.output.value = `Errore: ${err.message}`;
+  } finally {
+    els.btnSuggest.disabled = false;
+    els.btnSuggest.textContent = '✍️ Genera risposta';
+  }
+}
+
+els.btnSuggest.addEventListener('click', fetchReply);
+
