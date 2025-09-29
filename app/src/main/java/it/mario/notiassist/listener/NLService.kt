@@ -11,19 +11,22 @@ class NLService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val n = sbn.notification ?: return
 
+        // Cerca un'azione con RemoteInput (la "Rispondi")
         val actions = n.actions ?: return
         var replyIdx = -1
         actions.forEachIndexed { idx, action ->
-            val ri = action?.remoteInputs
-            if (ri != null && ri.isNotEmpty()) replyIdx = idx
+            val inputs = action?.remoteInputs
+            if (inputs != null && inputs.isNotEmpty()) replyIdx = idx
         }
         if (replyIdx < 0) return
 
         val extras = n.extras
         val title = (extras.getCharSequence(Notification.EXTRA_TITLE) ?: sbn.packageName).toString()
-        val text = (extras.getCharSequence(Notification.EXTRA_TEXT) ?: "").toString()
-        val lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)?.joinToString("\n") { "$it" } ?: text
+        val text  = (extras.getCharSequence(Notification.EXTRA_TEXT) ?: "").toString()
+        val lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)
+            ?.joinToString("\n") { "$it" } ?: text
 
+        // Apri l'activity di conferma (l'utente approva/modifica prima di inviare)
         val i = Intent(this, ConfirmReplyActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra("title", title)
