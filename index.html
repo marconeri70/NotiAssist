@@ -16,9 +16,10 @@
       <label for="apiKey">🔑 OpenAI API Key</label>
       <div class="row">
         <input id="apiKey" type="password" placeholder="sk-..." autocomplete="off"/>
-        <button id="btnSaveKey" class="secondary">Salva</button>
-        <button id="btnClearKey" class="ghost">Rimuovi</button>
+        <button id="btnSaveKey" class="secondary" type="button">Salva</button>
+        <button id="btnClearKey" class="ghost" type="button">Rimuovi</button>
       </div>
+      <p id="keyStatus" class="muted xs"></p>
       <p class="muted xs">La chiave resta solo sul tuo browser (opzionale salvataggio in locale). Non viene inviata a terzi oltre a OpenAI.</p>
     </div>
 
@@ -51,8 +52,8 @@
       </div>
 
       <div class="row">
-        <button id="btnSuggest">✍️ Genera risposta</button>
-        <button id="btnClear" class="ghost">Pulisci</button>
+        <button id="btnSuggest" type="button">✍️ Genera risposta</button>
+        <button id="btnClear" class="ghost" type="button">Pulisci</button>
       </div>
     </div>
 
@@ -60,6 +61,17 @@
       <label for="output">✅ Bozza AI (modificabile prima dell’invio)</label>
       <textarea id="output" placeholder="La risposta AI apparirà qui..." ></textarea>
       <div class="row">
-        <button id="btnCopy" class="secondary">Copia</button>
+        <button id="btnCopy" class="secondary" type="button">Copia</button>
       </div>
-      <p class="muted xs">Questa demo non invia la risposta a nessuna app di messaggist
+      <p class="muted xs">Questa demo non invia la risposta a nessuna app di messaggistica; serve solo per provare il testo.</p>
+    </div>
+
+    <footer>
+      <span class="muted xs">© NotiAssist Web – demo personale</span>
+      <a class="xs" href="https://platform.openai.com/docs" target="_blank" rel="noopener">Docs OpenAI</a>
+    </footer>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
