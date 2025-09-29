@@ -10,12 +10,11 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
-import it.mario.notiassist.R
 import it.mario.notiassist.AiClient
+import it.mario.notiassist.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ConfirmReplyActivity : ComponentActivity() {
 
@@ -38,14 +37,14 @@ class ConfirmReplyActivity : ComponentActivity() {
         val et = findViewById<EditText>(R.id.etReply)
 
         // Prende API key da SharedPreferences
-        val prefs = getSharedPreferences("notiassist_prefs", Context.MODE_PRIVATE)
-        val key = prefs.getString("openai_key", "") ?: ""
+        val key = getSharedPreferences("notiassist_prefs", Context.MODE_PRIVATE)
+            .getString("openai_key", "") ?: ""
 
-        // Chiede una bozza a ChatGPT (se hai messo la chiave)
+        // Chiede una bozza all'AI (senza lifecycleScope per evitare dipendenza extra)
         if (key.isNotBlank()) {
-            lifecycleScope.launch(Dispatchers.IO) {
+            CoroutineScope(Dispatchers.IO).launch {
                 val suggestion = AiClient.suggestReply(key, "$title\n$preview")
-                withContext(Dispatchers.Main) { et.setText(suggestion) }
+                runOnUiThread { et.setText(suggestion) }
             }
         }
 
@@ -68,12 +67,16 @@ class ConfirmReplyActivity : ComponentActivity() {
 
         val results = android.os.Bundle()
         inputs.forEach { ri -> results.putCharSequence(ri.resultKey, message) }
-        val fillIn = android.content.Intent().also { RemoteInput.addResultsToIntent(inputs, it, results) }
+
+        val fillIn = android.content.Intent()
+        RemoteInput.addResultsToIntent(inputs, fillIn, results)
 
         return try {
-            pi.send(this, 0, fillIn); true
-        } catch (e: Exception) {
+            pi.send(this, 0, fillIn)
+            true
+        } catch (_: Exception) {
             false
         }
     }
 }
+
