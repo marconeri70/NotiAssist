@@ -2,35 +2,62 @@
 // NotiAssist Web – Script
 // =========================
 
+function $id(id){ return document.getElementById(id); }
+
 const els = {
-  apiKey: document.getElementById('apiKey'),
-  btnSaveKey: document.getElementById('btnSaveKey'),
-  btnClearKey: document.getElementById('btnClearKey'),
-  message: document.getElementById('message'),
-  tone: document.getElementById('tone'),
-  maxLen: document.getElementById('maxLen'),
-  model: document.getElementById('model'),
-  btnSuggest: document.getElementById('btnSuggest'),
-  btnClear: document.getElementById('btnClear'),
-  output: document.getElementById('output'),
-  btnCopy: document.getElementById('btnCopy')
+  apiKey: $id('apiKey'),
+  keyStatus: $id('keyStatus'),
+  btnSaveKey: $id('btnSaveKey'),
+  btnClearKey: $id('btnClearKey'),
+  message: $id('message'),
+  tone: $id('tone'),
+  maxLen: $id('maxLen'),
+  model: $id('model'),
+  btnSuggest: $id('btnSuggest'),
+  btnClear: $id('btnClear'),
+  output: $id('output'),
+  btnCopy: $id('btnCopy')
 };
 
 // --- Persistence API key (localStorage, opzionale)
 (function initKey() {
-  const saved = localStorage.getItem('NOTIASSIST_OPENAI_KEY');
-  if (saved) els.apiKey.value = saved;
+  try {
+    const saved = localStorage.getItem('NOTIASSIST_OPENAI_KEY');
+    if (saved) {
+      els.apiKey.value = saved;
+      els.keyStatus.textContent = 'Chiave caricata da memoria locale.';
+    } else {
+      els.keyStatus.textContent = 'Nessuna chiave salvata.';
+    }
+  } catch {
+    els.keyStatus.textContent = 'Impossibile accedere al localStorage.';
+  }
 })();
+
 els.btnSaveKey.addEventListener('click', () => {
-  const k = (els.apiKey.value || '').trim();
-  if (!k) return alert('Inserisci una API key valida (sk-...)');
-  localStorage.setItem('NOTIASSIST_OPENAI_KEY', k);
-  alert('API key salvata localmente (puoi rimuoverla con "Rimuovi").');
+  try {
+    const k = (els.apiKey.value || '').trim();
+    if (!k) {
+      els.keyStatus.textContent = 'Inserisci una API key valida (sk-...).';
+      return;
+    }
+    localStorage.setItem('NOTIASSIST_OPENAI_KEY', k);
+    els.keyStatus.textContent = '✅ API key salvata localmente.';
+  } catch (e) {
+    console.error(e);
+    els.keyStatus.textContent = 'Errore nel salvataggio della chiave.';
+  }
 });
+
 els.btnClearKey.addEventListener('click', () => {
-  localStorage.removeItem('NOTIASSIST_OPENAI_KEY');
-  els.apiKey.value = '';
-  alert('API key rimossa dal browser.');
+  try {
+    localStorage.removeItem('NOTIASSIST_OPENAI_KEY');
+    els.apiKey.value = '';
+    els.keyStatus.textContent = '🗑️ API key rimossa dal browser.';
+  } catch (e) {
+    console.error(e);
+    els.keyStatus.textContent = 'Errore nella rimozione della chiave.';
+  }
 });
 
 // --- Helpers UI
@@ -40,8 +67,10 @@ els.btnClear.addEventListener('click', () => {
 });
 els.btnCopy.addEventListener('click', async () => {
   if (!els.output.value.trim()) return;
-  await navigator.clipboard.writeText(els.output.value);
-  alert('Copiato negli appunti!');
+  try {
+    await navigator.clipboard.writeText(els.output.value);
+    alert('Copiato negli appunti!');
+  } catch {}
 });
 
 // --- Prompt builder
@@ -52,17 +81,16 @@ function buildSystemPrompt(tone) {
     formale: 'tono formale e conciso',
     telegrafico: 'risposta telegrafica, essenziale'
   };
+  const n = Math.max(1, parseInt(els.maxLen.value || '2', 10));
   return `Sei un assistente che scrive risposte brevi in italiano (${tones[tone] || 'tono neutro'}).
 Regole:
-- max 1-${Math.max(1, parseInt(els.maxLen.value||'2',10))} frasi
+- max 1-${n} frasi
 - niente emoji, niente link
 - se il messaggio è ambiguo, chiedi un chiarimento cortese in UNA sola frase
 - vietato inventare dettagli.`;
 }
 
 // --- Call OpenAI (Chat Completions)
-// Nota: chiamata diretta dal browser; la tua API key rimane sul client.
-// Per produzione è consigliabile un proxy lato server.
 async function fetchReply() {
   const apiKey = (els.apiKey.value || '').trim();
   if (!apiKey) {
