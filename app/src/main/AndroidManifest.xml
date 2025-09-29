@@ -22,16 +22,10 @@
         <activity
             android:name="it.mario.notiassist.ui.ConfirmReplyActivity"
             android:exported="true"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
+            android:launchMode="singleTop"/>
 
         <service
             android:name="it.mario.notiassist.listener.NLService"
-            android:label="Notification Listener"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="true">
             <intent-filter>
