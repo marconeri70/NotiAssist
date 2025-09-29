@@ -31,7 +31,6 @@ jobs:
         with:
           gradle-version: 8.7
 
-      # Genero wrapper *in CI* così poi uso ./gradlew (più stabile e con cache)
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.7
 
@@ -87,7 +86,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Assemble Release (unsigned)
-        run: ./gradlew clean assembleRelease
+        run: ./gradlew clean assembleRelease --stacktrace --info
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
