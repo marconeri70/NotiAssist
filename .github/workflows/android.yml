@@ -26,21 +26,26 @@ jobs:
           api-level: 34
           build-tools: 34.0.0
 
-      # Installa Gradle 8.7 anche se non hai il wrapper nel repo
       - name: Install Gradle 8.7
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.7
 
-      # Genera il Gradle Wrapper dentro il repo di build (runtime)
+      # Genero wrapper *in CI* così poi uso ./gradlew (più stabile e con cache)
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.7
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Assemble Debug
-        run: ./gradlew clean assembleDebug
+      - name: Show env
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ./gradlew --version
+
+      - name: Assemble Debug (verbose)
+        run: ./gradlew clean assembleDebug --stacktrace --info
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
