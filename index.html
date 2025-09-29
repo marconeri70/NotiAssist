@@ -1,22 +1,65 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NotiAssist Web</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NotiAssist Web (AI)</title>
+  <link rel="stylesheet" href="style.css"/>
+  <meta name="description" content="Demo web che genera risposte smart a notifiche usando l'API di ChatGPT."/>
 </head>
 <body>
   <div class="container">
-    <h1>📩 NotiAssist Web</h1>
-    <p>Demo semplice che simula la gestione notifiche.</p>
+    <h1>📩 NotiAssist Web (AI)</h1>
+    <p class="muted">Demo HTML/JS. Inserisci la tua OpenAI API Key e genera una risposta “intelligente” a un messaggio.</p>
 
-    <textarea id="message" placeholder="Scrivi un messaggio..."></textarea>
-    <button onclick="sendMessage()">Invia</button>
+    <div class="card">
+      <label for="apiKey">🔑 OpenAI API Key</label>
+      <div class="row">
+        <input id="apiKey" type="password" placeholder="sk-..." autocomplete="off"/>
+        <button id="btnSaveKey" class="secondary">Salva</button>
+        <button id="btnClearKey" class="ghost">Rimuovi</button>
+      </div>
+      <p class="muted xs">La chiave resta solo sul tuo browser (opzionale salvataggio in locale). Non viene inviata a terzi oltre a OpenAI.</p>
+    </div>
 
-    <div id="output"></div>
-  </div>
+    <div class="card">
+      <label for="message">💬 Messaggio ricevuto (simula una notifica)</label>
+      <textarea id="message" placeholder="Es. 'Ciao Marco, arrivi alle 18?'"></textarea>
 
-  <script src="script.js"></script>
-</body>
-</html>
+      <div class="row">
+        <div class="col">
+          <label for="tone">Tono</label>
+          <select id="tone">
+            <option value="neutro" selected>Neutro</option>
+            <option value="cordiale">Cordiale</option>
+            <option value="formale">Formale</option>
+            <option value="telegrafico">Telegrafico</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="maxLen">Lunghezza max (frasi)</label>
+          <input id="maxLen" type="number" min="1" max="4" value="2"/>
+        </div>
+        <div class="col">
+          <label for="model">Modello</label>
+          <select id="model">
+            <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+            <option value="gpt-4o-mini-2024-07-18">gpt-4o-mini-2024-07-18</option>
+            <option value="gpt-4o">gpt-4o</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="btnSuggest">✍️ Genera risposta</button>
+        <button id="btnClear" class="ghost">Pulisci</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <label for="output">✅ Bozza AI (modificabile prima dell’invio)</label>
+      <textarea id="output" placeholder="La risposta AI apparirà qui..." ></textarea>
+      <div class="row">
+        <button id="btnCopy" class="secondary">Copia</button>
+      </div>
+      <p class="muted xs">Questa demo non invia la risposta a nessuna app di messaggist
