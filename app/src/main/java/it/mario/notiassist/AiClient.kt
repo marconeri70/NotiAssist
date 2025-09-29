@@ -11,8 +11,8 @@ object AiClient {
     private val http = OkHttpClient()
 
     fun suggestReply(apiKey: String, context: String): String {
-        val sys = "Sei un assistente italiano. Scrivi risposte brevi, educate, pertinenti al messaggio. Evita dati sensibili. Se il contenuto è ambiguo, chiedi cortese chiarimento."
-        val user = "Messaggio ricevuto:\n" + context + "\n\nScrivi una risposta adeguata (max 1-2 frasi)."
+        val sys = "Sei un assistente italiano. Rispondi in 1-2 frasi, educate e pertinenti. Se il messaggio è ambiguo, chiedi cortesemente chiarimenti."
+        val user = "Messaggio ricevuto:\n$context\n\nScrivi una risposta adeguata (max 2 frasi)."
 
         val bodyJson = JSONObject().apply {
             put("model", "gpt-4o-mini")
@@ -24,12 +24,12 @@ object AiClient {
 
         val req = Request.Builder()
             .url("https://api.openai.com/v1/chat/completions")
-            .addHeader("Authorization", "Bearer " + apiKey)
+            .addHeader("Authorization", "Bearer $apiKey")
             .post(RequestBody.create("application/json".toMediaType(), bodyJson))
             .build()
 
         http.newCall(req).execute().use { resp ->
-            val body = resp.body?.string() ?: ""
+            val body = resp.body?.string().orEmpty()
             return try {
                 val json = JSONObject(body)
                 json.getJSONArray("choices")
@@ -37,8 +37,8 @@ object AiClient {
                     .getJSONObject("message")
                     .getString("content")
                     .trim()
-            } catch (e: Exception) {
-                // In caso di errore, restituiamo una bozza neutra
+            } catch (_: Exception) {
+                // Bozza neutra in caso di errore API
                 "Grazie del messaggio; ti rispondo appena possibile."
             }
         }
